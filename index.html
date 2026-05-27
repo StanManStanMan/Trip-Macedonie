@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>7-Day Trip Planner: Cluj → Moldova → Skopje</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #2d3748; }
+
+  header {
+    background: linear-gradient(135deg, #1a365d, #2b6cb0);
+    color: white;
+    padding: 32px 24px 24px;
+    text-align: center;
+  }
+  header h1 { font-size: 2rem; margin-bottom: 6px; }
+  header p { opacity: 0.85; font-size: 1rem; }
+
+  .route-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: #2b6cb0;
+    padding: 12px 24px;
+    color: white;
+    font-size: 0.95rem;
+  }
+  .route-bar span { background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 20px; }
+  .route-bar .arrow { font-size: 1.2rem; }
+
+  .controls {
+    max-width: 900px;
+    margin: 24px auto 0;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .controls label { font-weight: 600; font-size: 0.95rem; }
+  .controls input[type="date"] {
+    padding: 8px 12px;
+    border: 2px solid #bee3f8;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+  }
+  .controls input[type="date"]:focus { outline: none; border-color: #2b6cb0; }
+
+  .calendar {
+    max-width: 900px;
+    margin: 20px auto 40px;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .day-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .day-card:hover { transform: translateY(-2px); }
+
+  .day-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-left: 5px solid #2b6cb0;
+  }
+  .day-number {
+    background: #2b6cb0;
+    color: white;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-align: center;
+    padding-top: 5px;
+    flex-shrink: 0;
+  }
+  .day-number .num { font-size: 1.1rem; line-height: 1; }
+  .day-title { flex: 1; }
+  .day-title h2 { font-size: 1.1rem; color: #1a365d; }
+  .day-title .date-label { font-size: 0.85rem; color: #718096; margin-top: 2px; }
+  .location-badge {
+    background: #ebf8ff;
+    color: #2b6cb0;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .day-body { padding: 0 20px 20px; }
+
+  .activities {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .activity {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background: #f7fafc;
+  }
+  .activity img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    display: block;
+  }
+  .activity-info { padding: 8px 10px; }
+  .activity-info strong { font-size: 0.85rem; display: block; color: #2d3748; }
+  .activity-info span { font-size: 0.78rem; color: #718096; }
+
+  .transport-box {
+    margin-top: 14px;
+    background: #fffaf0;
+    border: 1px solid #fbd38d;
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .transport-box h4 { font-size: 0.85rem; color: #c05621; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .transport-box ul { list-style: none; padding: 0; }
+  .transport-box ul li {
+    font-size: 0.82rem;
+    color: #744210;
+    padding: 3px 0;
+    border-bottom: 1px dashed #fbd38d;
+  }
+  .transport-box ul li:last-child { border-bottom: none; }
+
+  .notes-box {
+    margin-top: 10px;
+    background: #f0fff4;
+    border: 1px solid #9ae6b4;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #276749;
+  }
+
+  .legend {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    padding: 0 16px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: #4a5568;
+  }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+  .cost-summary {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    padding: 0 16px;
+  }
+  .cost-summary .box {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  .cost-summary h3 { font-size: 1rem; color: #1a365d; margin-bottom: 12px; }
+  .cost-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .cost-table th { background: #ebf8ff; color: #2b6cb0; padding: 8px 12px; text-align: left; }
+  .cost-table td { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; }
+  .cost-table tr:last-child td { border-bottom: none; font-weight: 700; background: #f7fafc; }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.75rem;
+    color: #a0aec0;
+  }
+  footer a { color: #a0aec0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗺️ 7-Day Eastern Europe Adventure</h1>
+  <p>Cluj-Napoca &rarr; Chișinău, Moldova &rarr; Skopje, North Macedonia</p>
+</header>
+
+<div class="route-bar">
+  <span>🇷🇴 Cluj-Napoca</span>
+  <span class="arrow">→</span>
+  <span>🚌 Bus ~12h · €35–41</span>
+  <span class="arrow">→</span>
+  <span>🇲🇩 Chișinău</span>
+  <span class="arrow">→</span>
+  <span>🚌 Bus ~24h · €60–90</span>
+  <span class="arrow">→</span>
+  <span>🇲🇰 Skopje</span>
+</div>
+
+<div class="controls">
+  <label for="startDate">📅 Set Start Date:</label>
+  <input type="date" id="startDate" />
+</div>
+
+<div class="calendar" id="calendar"></div>
+
+<div class="cost-summary">
+  <div class="box">
+    <h3>💰 Estimated Transport Costs</h3>
+    <table class="cost-table">
+      <thead>
+        <tr><th>Leg</th><th>Mode</th><th>Duration</th><th>Est. Cost</th><th>Booking</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Cluj-Napoca → Chișinău</td>
+          <td>🚌 FlixBus / Direct Bus</td>
+          <td>~11–12.5h</td>
+          <td>€32–41</td>
+          <td>flixbus.com / autogari.ro</td>
+        </tr>
+        <tr>
+          <td>Cluj-Napoca → Chișinău</td>
+          <td>🚂 Train (via Iași)</td>
+          <td>~14–16h</td>
+          <td>€25–60</td>
+          <td>cfrcalatori.ro</td>
+        </tr>
+        <tr>
+          <td>Chișinău → Bucharest</td>
+          <td>🚌 Bus</td>
+          <td>~7–8h</td>
+          <td>€20–30</td>
+          <td>infobus.eu</td>
+        </tr>
+        <tr>
+          <td>Bucharest → Sofia</td>
+          <td>🚌 FlixBus</td>
+          <td>~8–9h</td>
+          <td>€20–35</td>
+          <td>flixbus.com</td>
+        </tr>
+        <tr>
+          <td>Sofia → Skopje</td>
+          <td>🚌 Bus</td>
+          <td>~4–5h</td>
+          <td>€10–20</td>
+          <td>rome2rio.com</td>
+        </tr>
+        <tr>
+          <td colspan="3"><strong>Total Transport (est.)</strong></td>
+          <td><strong>€82–126</strong></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  Images: Wikimedia Commons (CC BY 2.0 / CC BY-SA 3.0). Prices are estimates — always verify before booking. <br/>
+  Turda Gorge photo © <a href="https://www.flickr.com/photos/79653482@N00">Cristian Bortes</a> CC BY 2.0 |
+  Chișinău park photo © <a href="https://commons.wikimedia.org/wiki/User:Myrabella">Myrabella</a> CC BY-SA 3.0
+</footer>
+
+<script>
+const days = [
+  {
+    title: "Arrival & Old Town Exploration",
+    location: "Cluj-Napoca 🇷🇴",
+    color: "#2b6cb0",
+    activities: [
+      {
+        name: "Piața Unirii (Union Square)",
+        desc: "Gothic St. Michael's Church & Matthias Corvinus statue",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Pia%C8%9Ba_Unirii_din_Cluj-Napoca_%2852055213738%29.jpg/640px-Pia%C8%9Ba_Unirii_din_Cluj-Napoca_%2852055213738%29.jpg"
+      },
+      {
+        name: "Cetățuia Hill",
+        desc: "Panoramic views of the city at sunset",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Cluj_Napoca_-_panoramio_%281%29.jpg/640px-Cluj_Napoca_-_panoramio_%281%29.jpg"
+      },
+      {
+        name: "Museum Square & Old Town",
+        desc: "Bars, cafés, local culture",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/2019_Ansamblul_urban_Centrul_istoric_al_ora%C8%99ului_02.jpg/640px-2019_Ansamblul_urban_Centrul_istoric_al_ora%C8%99ului_02.jpg"
+      }
+    ],
+    transport: null,
+    notes: "✅ Arrive in Cluj-Napoca. Check in to your accommodation. Explore the city centre on foot — everything is walkable."
+  },
+  {
+    title: "Nature Day: Turda Gorge & Salt Mine",
+    location: "Cluj-Napoca area 🇷🇴",
+    color: "#276749",
+    activities: [
+      {
+        name: "Cheile Turzii (Turda Gorge)",
+        desc: "Dramatic limestone canyon, hiking trails",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Cheile_Turzii_%28Turda_Gorges%29.jpg/640px-Cheile_Turzii_%28Turda_Gorges%29.jpg"
+      },
+      {
+        name: "Salina Turda (Salt Mine)",
+        desc: "Spectacular underground world, ~30 min from gorge",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Salina_Turda_-_Panorama.jpg/640px-Salina_Turda_-_Panorama.jpg"
+      },
+      {
+        name: "Hoia Baciu Forest",
+        desc: "Mysterious forest walk on the city's edge",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Hoia_Baciu_Forest.jpg/640px-Hoia_Baciu_Forest.jpg"
+      }
+    ],
+    transport: null,
+    notes: "🚌 Take a local bus or taxi to Turda (~30 km). Turda Gorge hike: ~2–3h. Then visit Salina Turda (entry ~€10). Return to Cluj in the evening."
+  },
+  {
+    title: "Travel Day: Cluj → Chișinău",
+    location: "Cluj → Chișinău 🇲🇩",
+    color: "#c05621",
+    activities: [
+      {
+        name: "Botanical Garden (morning)",
+        desc: "10,000+ plant species before departure",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/2019_Ansamblul_urban_Centrul_istoric_al_ora%C8%99ului_03.jpg/640px-2019_Ansamblul_urban_Centrul_istoric_al_ora%C8%99ului_03.jpg"
+      },
+      {
+        name: "Overnight Bus to Chișinău",
+        desc: "Depart ~evening, arrive next morning",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Kolozsvar_Foter_deli_sor.JPG/640px-Kolozsvar_Foter_deli_sor.JPG"
+      }
+    ],
+    transport: {
+      title: "🚌 Cluj-Napoca → Chișinău",
+      items: [
+        "FlixBus: ~€41 | Duration: ~11–12.5h | Departs: multiple times daily",
+        "Other operators (GAL Trans, Alverstur): ~€32–35",
+        "Departure: Autogara Fany or Autogara Beta, Cluj",
+        "Arrival: Gara Nord bus station, Chișinău",
+        "Train option: via Iași + Ungheni | ~€25–60 | ~14–16h"
+      ]
+    },
+    notes: "🌙 Take an evening bus to arrive in Chișinău by morning. Sleep on the bus to save time & accommodation costs."
+  },
+  {
+    title: "Chișinău City & Wine",
+    location: "Chișinău, Moldova 🇲🇩",
+    color: "#553c9a",
+    activities: [
+      {
+        name: "Ștefan cel Mare Central Park",
+        desc: "Triumphal Arch, fountain, city strolls",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Chisinau_Stefan_cel_Mare_park_fountain.jpg/640px-Chisinau_Stefan_cel_Mare_park_fountain.jpg"
+      },
+      {
+        name: "Cricova / Mileștii Mici Winery",
+        desc: "World's largest wine collection underground",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Milestii_Mici_winery.jpg/640px-Milestii_Mici_winery.jpg"
+      },
+      {
+        name: "National Museum of History",
+        desc: "Moldova's history from ancient times to today",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/National_Museum_of_History_of_Moldova.jpg/640px-National_Museum_of_History_of_Moldova.jpg"
+      }
+    ],
+    transport: null,
+    notes: "🍷 Arrive in the morning, check in. Explore the city centre on foot. Afternoon: book a winery tour (Cricova or Mileștii Mici — tours from ~€15–25)."
+  },
+  {
+    title: "Old Orhei & Valle Morilor",
+    location: "Chișinău & surroundings 🇲🇩",
+    color: "#276749",
+    activities: [
+      {
+        name: "Old Orhei (Orheiul Vechi)",
+        desc: "Cave monastery in dramatic cliff landscape",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Orheiul_Vechi_-_Moldova.jpg/640px-Orheiul_Vechi_-_Moldova.jpg"
+      },
+      {
+        name: "Valea Morilor Park",
+        desc: "Urban lake park, rowing boats, sunset walks",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Valea_Morilor_Lake%2C_Chisinau.jpg/640px-Valea_Morilor_Lake%2C_Chisinau.jpg"
+      },
+      {
+        name: "Piața Centrală (Central Market)",
+        desc: "Local life, fresh produce, Moldovan food",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Chisinau_central_market.jpg/640px-Chisinau_central_market.jpg"
+      }
+    ],
+    transport: {
+      title: "🚌 Day Trip to Old Orhei",
+      items: [
+        "Minibus (Rutiera) from Chișinău Central Bus Station",
+        "Direction: Orhei | Duration: ~1h | Cost: ~€2–3",
+        "Or join a guided day tour from Chișinău (~€20–30)"
+      ]
+    },
+    notes: "🏛️ Morning: day trip to Old Orhei cave monastery (~60 km). Afternoon: return to Chișinău, stroll Valle Morilor park and visit the market."
+  },
+  {
+    title: "Travel Day: Chișinău → Skopje",
+    location: "Chișinău → Skopje 🇲🇰",
+    color: "#c05621",
+    activities: [
+      {
+        name: "Dendrarium Park (morning)",
+        desc: "Tranquil botanical park before departure",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Chisinau_Dendrarium.jpg/640px-Chisinau_Dendrarium.jpg"
+      },
+      {
+        name: "Long-distance bus journey",
+        desc: "Via Bucharest & Sofia to Skopje",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Skopje_panorama.jpg/640px-Skopje_panorama.jpg"
+      }
+    ],
+    transport: {
+      title: "🚌 Chișinău → Skopje (multi-leg)",
+      items: [
+        "Leg 1: Chișinău → Bucharest | Bus ~7–8h | ~€20–30",
+        "Leg 2: Bucharest → Sofia | FlixBus ~8–9h | ~€20–35",
+        "Leg 3: Sofia → Skopje | Bus ~4–5h | ~€10–20",
+        "Total journey: ~20–24h with connections",
+        "Book each leg separately on flixbus.com or infobus.eu"
+      ]
+    },
+    notes: "⚠️ This is a long travel day. Consider an early departure. You may need to overnight in Bucharest or Sofia to break up the journey. Arrive Skopje by late evening or next morning."
+  },
+  {
+    title: "Skopje City & Matka Canyon",
+    location: "Skopje, North Macedonia 🇲🇰",
+    color: "#c53030",
+    activities: [
+      {
+        name: "Macedonia Square & Old Bazaar",
+        desc: "Giant statues, Ottoman bazaar, Stone Bridge",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Skopje_Macedonia_Square.jpg/640px-Skopje_Macedonia_Square.jpg"
+      },
+      {
+        name: "Matka Canyon",
+        desc: "Kayaking, boat trips, caves, dramatic cliffs",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Matka_Canyon.jpg/640px-Matka_Canyon.jpg"
+      },
+      {
+        name: "Vodno Mountain & Millennium Cross",
+        desc: "Cable car, panoramic views of Skopje",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Millennium_Cross_Skopje.jpg/640px-Millennium_Cross_Skopje.jpg"
+      }
+    ],
+    transport: null,
+    notes: "🎉 Final day! Morning: explore Macedonia Square, Old Bazaar & Kale Fortress. Afternoon: taxi or bus to Matka Canyon (~15 km, ~€5–10). Evening: farewell dinner in the Old Bazaar."
+  }
+];
+
+function formatDate(baseDate, offset) {
+  const d = new Date(baseDate);
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function render() {
+  const input = document.getElementById('startDate').value;
+  const base = input ? new Date(input) : null;
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = '';
+
+  days.forEach((day, i) => {
+    const dateLabel = base ? formatDate(base, i) : `Day ${i + 1}`;
+    const card = document.createElement('div');
+    card.className = 'day-card';
+
+    let activitiesHTML = day.activities.map(a => `
+      <div class="activity">
+        <img src="${a.img}" alt="${a.name}" onerror="this.style.display='none'"/>
+        <div class="activity-info">
+          <strong>${a.name}</strong>
+          <span>${a.desc}</span>
+        </div>
+      </div>
+    `).join('');
+
+    let transportHTML = '';
+    if (day.transport) {
+      transportHTML = `
+        <div class="transport-box">
+          <h4>🚌 Transport Info</h4>
+          <ul>${day.transport.items.map(t => `<li>• ${t}</li>`).join('')}</ul>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="day-header" style="border-left-color: ${day.color}">
+        <div class="day-number" style="background:${day.color}">
+          <span class="num">${i + 1}</span>
+          <span>DAY</span>
+        </div>
+        <div class="day-title">
+          <h2>${day.title}</h2>
+          <div class="date-label">${dateLabel}</div>
+        </div>
+        <div class="location-badge" style="background:${day.color}22; color:${day.color}">${day.location}</div>
+      </div>
+      <div class="day-body">
+        <div class="activities">${activitiesHTML}</div>
+        ${transportHTML}
+        <div class="notes-box">📌 ${day.notes}</div>
+      </div>
+    `;
+    cal.appendChild(card);
+  });
+}
+
+// Set default to today
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const dd = String(today.getDate()).padStart(2, '0');
+document.getElementById('startDate').value = `${yyyy}-${mm}-${dd}`;
+
+document.getElementById('startDate').addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
