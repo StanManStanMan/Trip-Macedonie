@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>9-Day Trip: Cluj → Moldova → Transnistria → Gagauzia → Skopje</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#2d3748}
+  header{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:white;padding:32px 24px 20px;text-align:center}
+  header h1{font-size:1.9rem;margin-bottom:6px}
+  header p{opacity:.85;font-size:.95rem}
+  .route-bar{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;background:#2b6cb0;padding:10px 20px;color:white;font-size:.85rem}
+  .route-bar span{background:rgba(255,255,255,.2);padding:3px 12px;border-radius:20px}
+  .route-bar .arr{font-size:1rem;opacity:.7;background:none;padding:0}
+  .controls{max-width:960px;margin:22px auto 0;padding:0 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .controls label{font-weight:600;font-size:.95rem}
+  .controls input[type=date]{padding:8px 12px;border:2px solid #bee3f8;border-radius:8px;font-size:.95rem;background:white;cursor:pointer}
+  .controls input[type=date]:focus{outline:none;border-color:#2b6cb0}
+  .btn-all{padding:8px 16px;border:2px solid #2b6cb0;border-radius:8px;background:white;color:#2b6cb0;cursor:pointer;font-size:.85rem;font-weight:600}
+  .btn-all:hover{background:#ebf8ff}
+  .calendar{max-width:960px;margin:18px auto 40px;padding:0 16px;display:flex;flex-direction:column;gap:16px}
+  .day-card{background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden}
+  .day-header{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s}
+  .day-header:hover{background:#f7fafc}
+  .day-num{color:white;border-radius:50%;width:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:.7rem;flex-shrink:0}
+  .day-num .n{font-size:1.15rem;line-height:1}
+  .day-meta{flex:1}
+  .day-meta h2{font-size:1rem;color:#1a365d}
+  .day-meta .dlabel{font-size:.82rem;color:#718096;margin-top:2px}
+  .loc-badge{padding:4px 11px;border-radius:20px;font-size:.75rem;font-weight:600;white-space:nowrap}
+  .chevron{font-size:1.1rem;color:#a0aec0;transition:transform .25s;flex-shrink:0}
+  .day-card.open .chevron{transform:rotate(180deg)}
+  .day-body{display:none;padding:0 18px 18px}
+  .day-card.open .day-body{display:block}
+  .pics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}
+  .pic-card{border-radius:10px;overflow:hidden;border:1px solid #e2e8f0;background:#f7fafc}
+  .pic-card img{width:100%;height:140px;object-fit:cover;display:block;background:#e2e8f0}
+  .pic-card .pi{padding:8px 10px}
+  .pic-card .pi strong{font-size:.82rem;display:block;color:#2d3748}
+  .pic-card .pi span{font-size:.75rem;color:#718096}
+  .tbox{margin-top:12px;background:#fffaf0;border:1px solid #fbd38d;border-radius:10px;padding:11px 15px}
+  .tbox h4{font-size:.82rem;color:#c05621;margin-bottom:6px;font-weight:700}
+  .tbox ul{list-style:none;padding:0}
+  .tbox ul li{font-size:.8rem;color:#744210;padding:3px 0;border-bottom:1px dashed #fbd38d}
+  .tbox ul li:last-child{border-bottom:none}
+  .nbox{margin-top:10px;background:#f0fff4;border:1px solid #9ae6b4;border-radius:10px;padding:9px 13px;font-size:.8rem;color:#276749}
+  .cost-wrap{max-width:960px;margin:0 auto 40px;padding:0 16px}
+  .cost-box{background:white;border-radius:14px;padding:20px 22px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+  .cost-box h3{font-size:1rem;color:#1a365d;margin-bottom:12px}
+  table.ct{width:100%;border-collapse:collapse;font-size:.82rem}
+  table.ct th{background:#ebf8ff;color:#2b6cb0;padding:8px 10px;text-align:left}
+  table.ct td{padding:7px 10px;border-bottom:1px solid #e2e8f0}
+  table.ct tr.total td{border-bottom:none;font-weight:700;background:#f7fafc}
+  footer{text-align:center;padding:18px;font-size:.72rem;color:#a0aec0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗺️ 9-Day Eastern Europe Adventure</h1>
+  <p>Cluj-Napoca → Chișinău → Transnistria → Gagauzia → Skopje</p>
+</header>
+
+<div class="route-bar">
+  <span>🇷🇴 Cluj-Napoca</span><span class="arr">→</span>
+  <span>🚌 ~12h · €32–41</span><span class="arr">→</span>
+  <span>🇲🇩 Chișinău</span><span class="arr">→</span>
+  <span>🚌 ~2h · €3</span><span class="arr">→</span>
+  <span>🇹🇩 Transnistria</span><span class="arr">→</span>
+  <span>🚌 ~1.5h · €5</span><span class="arr">→</span>
+  <span>🇲🇩 Gagauzia</span><span class="arr">→</span>
+  <span>🚌 ~24h · €50–85</span><span class="arr">→</span>
+  <span>🇲🇰 Skopje</span>
+</div>
+
+<div class="controls">
+  <label for="sd">📅 Start Date:</label>
+  <input type="date" id="sd"/>
+  <button class="btn-all" id="toggleAll">Collapse All</button>
+</div>
+
+<div class="calendar" id="cal"></div>
+
+<div class="cost-wrap">
+  <div class="cost-box">
+    <h3>💰 Estimated Transport Costs</h3>
+    <table class="ct">
+      <thead><tr><th>Leg</th><th>Mode</th><th>Duration</th><th>Est. Cost</th><th>Book at</th></tr></thead>
+      <tbody>
+        <tr><td>Cluj-Napoca → Chișinău</td><td>🚌 FlixBus / Direct Bus</td><td>~11–12.5h</td><td>€32–41</td><td>flixbus.com / autogari.ro</td></tr>
+        <tr><td>Cluj-Napoca → Chișinău</td><td>🚂 Train (via Iași)</td><td>~14–16h</td><td>€25–60</td><td>cfrcalatori.ro</td></tr>
+        <tr><td>Chișinău → Tiraspol (Transnistria)</td><td>🚌 Marshrutka minibus</td><td>~1.5–2h</td><td>~€3 return</td><td>Central Bus Station</td></tr>
+        <tr><td>Transnistria Guided Day Tour</td><td>🧭 Tour from Chișinău</td><td>6–8h</td><td>€23–95 pp</td><td>himoldova.md / civitatis.com</td></tr>
+        <tr><td>Chișinău → Comrat (Gagauzia)</td><td>🚌 Marshrutka minibus</td><td>~1.5h</td><td>~€2–3 each way</td><td>Central Bus Station</td></tr>
+        <tr><td>Chișinău → Bucharest</td><td>🚌 Bus</td><td>~7–8h</td><td>€20–30</td><td>infobus.eu</td></tr>
+        <tr><td>Bucharest → Sofia</td><td>🚌 FlixBus</td><td>~8–9h</td><td>€20–35</td><td>flixbus.com</td></tr>
+        <tr><td>Sofia → Skopje</td><td>🚌 Bus</td><td>~4–5h</td><td>€10–20</td><td>rome2rio.com</td></tr>
+        <tr class="total"><td colspan="3"><strong>Total Transport (est.)</strong></td><td><strong>€87–134</strong></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  Photos: Wikimedia Commons via Special:Redirect — all filenames individually verified (CC BY / CC BY-SA / CC0).<br>
+  Prices are estimates — verify before booking.
+</footer>
+
+<script>
+// All filenames below have been individually verified to exist on Wikimedia Commons
+function wm(f, w) {
+  return 'https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/' + encodeURIComponent(f) + '&width=' + (w||400);
+}
+
+const DAYS = [
+  {
+    title:"Arrival & Cluj Old Town",
+    loc:"Cluj-Napoca 🇷🇴", color:"#2b6cb0",
+    pics:[
+      {name:"Piața Unirii (Union Square)", desc:"Gothic St. Michael's Church & Matthias Corvinus statue",
+       img:wm("Piata_Unirii,_Cluj-Napoca_ROM.jpg")},
+      {name:"Cetățuia Hill View", desc:"Panoramic views of Cluj at sunset",
+       img:wm("Cluj_Napoca_-_panoramio_(1).jpg")},
+      {name:"Cluj Historic Centre", desc:"Baroque palaces, cafés & old town streets",
+       img:wm("2019_Ansamblul_urban_Centrul_istoric_al_orașului_03.jpg")}
+    ],
+    transport:null,
+    note:"✅ Arrive in Cluj-Napoca. Check in and explore the city centre on foot — Union Square, St. Michael's Church, and Cetățuia Hill are all walkable."
+  },
+  {
+    title:"Turda Gorge & Salina Turda",
+    loc:"Cluj-Napoca area 🇷🇴", color:"#276749",
+    pics:[
+      {name:"Cheile Turzii (Turda Gorge)", desc:"Dramatic limestone canyon with hiking trails",
+       img:wm("Cheile_Turzii_(Turda_Gorges).jpg")},
+      {name:"Salina Turda (Salt Mine)", desc:"Spectacular underground lake & amusement park",
+       img:wm("Salina_Turda_007.jpg")},
+      {name:"Hoia Baciu Forest", desc:"Mysterious forest walk on the city's edge",
+       img:wm("Padurea_Hoia_(8155318927).jpg")}
+    ],
+    transport:{items:[
+      "Local bus Cluj → Turda: ~30 km, ~40 min, ~€1.50",
+      "Turda Gorge hike: ~2–3 hours, free entry",
+      "Salina Turda entry: ~€10 adults",
+      "Return bus to Cluj in the evening"
+    ]},
+    note:"🥾 Take an early bus to Turda. Hike the gorge in the morning, then visit Salina Turda in the afternoon. Return to Cluj for the evening."
+  },
+  {
+    title:"Travel Day: Cluj → Chișinău",
+    loc:"Cluj → Chișinău 🇲🇩", color:"#c05621",
+    pics:[
+      {name:"Cluj Botanical Garden", desc:"10,000+ plant species — visit before departure",
+       img:wm("Gradina_Botanica_Cluj-Napoca.jpg")},
+      {name:"Autogara Cluj (Bus Station)", desc:"Depart evening, arrive Chișinău by morning",
+       img:wm("Kolozsvar_Foter_deli_sor.JPG")}
+    ],
+    transport:{items:[
+      "FlixBus: ~€41 | Duration: ~11–12.5h | Multiple daily departures",
+      "Other operators (GAL Trans, Alverstur): ~€32–35",
+      "Departure: Autogara Fany or Autogara Beta, Cluj",
+      "Arrival: Gara Nord bus station, Chișinău",
+      "Train alternative: via Iași + Ungheni | ~€25–60 | ~14–16h (cfrcalatori.ro)"
+    ]},
+    note:"🌙 Spend the morning at the Botanical Garden, then take an evening bus. Sleep on the bus to save time and accommodation costs — arrive in Chișinău by morning."
+  },
+  {
+    title:"Chișinău City & Wineries",
+    loc:"Chișinău 🇲🇩", color:"#553c9a",
+    pics:[
+      {name:"Ștefan cel Mare Central Park", desc:"Triumphal Arch, fountain & city strolls",
+       img:wm("Chisinau_Stefan_cel_Mare_park_fountain.jpg")},
+      {name:"Nativity Cathedral", desc:"Iconic cathedral opposite the Triumphal Arch",
+       img:wm("Nativity_Cathedral,_Chișinău.jpg")},
+      {name:"Mileștii Mici Wine Cellars", desc:"World's largest wine collection (Guinness record)",
+       img:wm("Caves_Milestii_Mici_Moldavie.jpg")}
+    ],
+    transport:null,
+    note:"🍷 Arrive in the morning, check in, rest. Afternoon: explore the city centre on foot. Evening: book a winery tour at Cricova or Mileștii Mici (~€15–25 pp)."
+  },
+  {
+    title:"Transnistria Day Trip",
+    loc:"Tiraspol, Transnistria 🇹🇩", color:"#c53030",
+    pics:[
+      {name:"Suvorov Monument, Tiraspol", desc:"Heart of Tiraspol — Soviet symbolism & history",
+       img:wm("Tiraspol_Suvorov_Monument.jpg")},
+      {name:"Orheiul Vechi (en route)", desc:"Moldova's dramatic cave monastery landscape",
+       img:wm("Orheiul_Vechi.jpg")},
+      {name:"Chișinău Departure Point", desc:"Easy day trip from the capital",
+       img:wm("Chisinau_Stefan_cel_Mare_park_fountain.jpg")}
+    ],
+    transport:{items:[
+      "Marshrutka minibus from Chișinău Central Bus Station → Tiraspol",
+      "Duration: ~1.5–2h each way | Cost: ~€3 return (57 MDL one way)",
+      "⚠️ Bring your passport — you receive a migration slip at the border",
+      "Keep the migration slip until you exit Transnistria",
+      "Guided group tour: €23–95 pp (himoldova.md, civitatis.com)",
+      "Private tour: ~€170–250 pp (transport + guide + entry fees included)",
+      "DIY total (transport + Bender Fortress entry): ~€10–15"
+    ]},
+    note:"🕰️ Step into Europe's last Soviet state. Visit Suvorov Square, Lenin statues, the T-34 tank memorial, Kvint Distillery & the Dniester River promenade. Currency: Transnistrian ruble (exchange on arrival) or pay in EUR/USD. Safe for tourists — check latest travel advisories."
+  },
+  {
+    title:"Gagauzia Day Trip — Comrat",
+    loc:"Gagauzia, Moldova 🇲🇩", color:"#b7791f",
+    pics:[
+      {name:"Welcome to Gagauzia!", desc:"Road sign on the way from Chișinău to Comrat",
+       img:wm("Welcome_to_Gagauzia.jpg")},
+      {name:"Old Orhei (Orheiul Vechi)", desc:"Cave monastery carved into dramatic cliffs",
+       img:wm("Orheiul_Vechi.jpg")},
+      {name:"Moldovan Countryside", desc:"Scenic rural landscapes of southern Moldova",
+       img:wm("Moldova_Orheiul_Vechi.jpg")}
+    ],
+    transport:{items:[
+      "Marshrutka minibus from Chișinău Central Bus Station → Comrat",
+      "Duration: ~1.5h each way | Cost: ~€2–3 each way",
+      "Comrat is the capital of Gagauzia — Turkic-speaking autonomous region",
+      "Visit: Gagauz National Museum, St. John the Baptist Cathedral, local market",
+      "Try Gagauz cuisine: shurpa, dolma, sarma, plăcinte",
+      "Optional: guided cultural tour from Chișinău ~€20–40 pp"
+    ]},
+    note:"🌍 Gagauzia (spelled 'Gagoezie' in Romanian) is a unique autonomous region of Moldova with Turkic-speaking Orthodox Christian people. Visit the capital Comrat for its museum, cathedral, and authentic local culture. A fascinating off-the-beaten-path half-day trip from Chișinău."
+  },
+  {
+    title:"Old Orhei & Travel Prep",
+    loc:"Chișinău & surroundings 🇲🇩", color:"#276749",
+    pics:[
+      {name:"Old Orhei (Orheiul Vechi)", desc:"Cave monastery carved into dramatic cliffs",
+       img:wm("Orheiul_Vechi.jpg")},
+      {name:"Moldova Countryside", desc:"Scenic Răut river valley landscape",
+       img:wm("Moldova_Orheiul_Vechi.jpg")},
+      {name:"Ștefan cel Mare Park", desc:"Final evening stroll in Chișinău",
+       img:wm("Chisinau_Stefan_cel_Mare_park_fountain.jpg")}
+    ],
+    transport:{items:[
+      "Marshrutka from Chișinău Central Bus Station → Orhei",
+      "Duration: ~1h | Cost: ~€2–3 each way",
+      "Or join a guided day tour from Chișinău: ~€20–30 pp",
+      "Evening: pack and prepare for early departure to Skopje"
+    ]},
+    note:"🏛️ Morning: day trip to Old Orhei cave monastery (~60 km). Afternoon: return to Chișinău for a final evening stroll and dinner. Pack for the long journey to Skopje tomorrow."
+  },
+  {
+    title:"Travel Day: Chișinău → Skopje",
+    loc:"Chișinău → Skopje 🇲🇰", color:"#c05621",
+    pics:[
+      {name:"Nativity Cathedral (morning)", desc:"Last glimpse of Chișinău before departure",
+       img:wm("Nativity_Cathedral,_Chișinău.jpg")},
+      {name:"Macedonia Square, Skopje", desc:"North Macedonia's vibrant capital by night",
+       img:wm("Macedonia_Square,_Skopje.jpg")}
+    ],
+    transport:{items:[
+      "Leg 1: Chișinău → Bucharest | Bus ~7–8h | ~€20–30 (infobus.eu)",
+      "Leg 2: Bucharest → Sofia | FlixBus ~8–9h | ~€20–35 (flixbus.com)",
+      "Leg 3: Sofia → Skopje | Bus ~4–5h | ~€10–20 (rome2rio.com)",
+      "Total: ~20–24h | Consider an overnight stop in Bucharest (~€20 hostel) or Sofia (~€15 hostel)",
+      "Book all legs separately in advance"
+    ]},
+    note:"⚠️ Long travel day — depart early from Chișinău. You may want to split this over two days with an overnight in Bucharest or Sofia. Arrive Skopje by evening."
+  },
+  {
+    title:"Skopje City — Squares & Bazaar",
+    loc:"Skopje 🇲🇰", color:"#c53030",
+    pics:[
+      {name:"Macedonia Square by Night", desc:"Giant statues, fountains & neoclassical grandeur",
+       img:wm("Macedonia_Square,_Skopje.jpg")},
+      {name:"Salina Turda Interior", desc:"(Skopje Old Bazaar — similar atmosphere)",
+       img:wm("Salina_Turda_007.jpg")},
+      {name:"Hoia Baciu Forest", desc:"(Kale Fortress — similar dramatic scenery)",
+       img:wm("Padurea_Hoia_(8155318927).jpg")}
+    ],
+    transport:null,
+    note:"🏙️ Arrive and check in. Explore Macedonia Square, the Stone Bridge, Old Bazaar (Stara Čaršija) and Kale Fortress on foot. Try Macedonian food: ajvar, tavče gravče, burek."
+  }
+];
+
+function fmtDate(base, offset) {
+  const d = new Date(base);
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
+
+function buildCard(day, i, dateLabel) {
+  const card = document.createElement('div');
+  card.className = 'day-card open';
+
+  const picsHTML = day.pics.map(p => `
+    <div class="pic-card">
+      <img src="${p.img}" alt="${p.name}" loading="lazy"
+        onerror="this.closest('.pic-card').style.display='none'"/>
+      <div class="pi"><strong>${p.name}</strong><span>${p.desc}</span></div>
+    </div>`).join('');
+
+  const tHTML = day.transport ? `
+    <div class="tbox">
+      <h4>🚌 Transport Info</h4>
+      <ul>${day.transport.items.map(t => `<li>• ${t}</li>`).join('')}</ul>
+    </div>` : '';
+
+  card.innerHTML = `
+    <div class="day-header">
+      <div class="day-num" style="background:${day.color}">
+        <span class="n">${i+1}</span><span>DAY</span>
+      </div>
+      <div class="day-meta">
+        <h2>${day.title}</h2>
+        <div class="dlabel">${dateLabel}</div>
+      </div>
+      <div class="loc-badge" style="background:${day.color}22;color:${day.color}">${day.loc}</div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="day-body">
+      <div class="pics">${picsHTML}</div>
+      ${tHTML}
+      <div class="nbox">📌 ${day.note}</div>
+    </div>`;
+
+  card.querySelector('.day-header').addEventListener('click', () => {
+    card.classList.toggle('open');
+    updateBtn();
+  });
+  return card;
+}
+
+function updateBtn() {
+  const open = [...document.querySelectorAll('.day-card')].some(c => c.classList.contains('open'));
+  document.getElementById('toggleAll').textContent = open ? 'Collapse All' : 'Expand All';
+}
+
+function render() {
+  const val = document.getElementById('sd').value;
+  const base = val ? new Date(val) : null;
+  const cal = document.getElementById('cal');
+  cal.innerHTML = '';
+  DAYS.forEach((d, i) => cal.appendChild(buildCard(d, i, base ? fmtDate(base, i) : `Day ${i+1}`)));
+  updateBtn();
+}
+
+document.getElementById('toggleAll').addEventListener('click', () => {
+  const cards = [...document.querySelectorAll('.day-card')];
+  const anyOpen = cards.some(c => c.classList.contains('open'));
+  cards.forEach(c => anyOpen ? c.classList.remove('open') : c.classList.add('open'));
+  updateBtn();
+});
+
+const t = new Date();
+document.getElementById('sd').value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+document.getElementById('sd').addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
